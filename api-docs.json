@@ -1,0 +1,349 @@
+swagger: '2.0'
+info:
+  title: E-Commerce API
+  description: API for the E-Commerce platform
+  contact:
+    email: you@example.com
+  version: v1
+host: 127.0.0.1:8000
+schemes:
+- http
+basePath: /
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Basic:
+    type: basic
+security:
+- Basic: []
+paths:
+  /api/login/:
+    post:
+      operationId: api_login_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CustomTokenObtainPair'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/CustomTokenObtainPair'
+      tags:
+      - api
+    parameters: []
+  /api/register/:
+    post:
+      operationId: api_register_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - api
+    parameters: []
+  /api/token/:
+    post:
+      operationId: api_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/TokenObtainPair'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenObtainPair'
+      tags:
+      - api
+    parameters: []
+  /api/token/refresh/:
+    post:
+      operationId: api_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/TokenRefresh'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenRefresh'
+      tags:
+      - api
+    parameters: []
+  /cart/add/:
+    post:
+      operationId: cart_add_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - cart
+    parameters: []
+  /create-checkout-session/:
+    post:
+      operationId: create-checkout-session_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - create-checkout-session
+    parameters: []
+  /mark-order-paid/{order_id}/:
+    post:
+      operationId: mark-order-paid_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - mark-order-paid
+    parameters:
+    - name: order_id
+      in: path
+      required: true
+      type: string
+  /my_products/:
+    get:
+      operationId: my_products_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - my_products
+    put:
+      operationId: my_products_update
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - my_products
+    delete:
+      operationId: my_products_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - my_products
+    parameters: []
+  /place/order/:
+    get:
+      operationId: place_order_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - place
+    post:
+      operationId: place_order_create
+      description: ''
+      parameters: []
+      responses:
+        '201':
+          description: ''
+      tags:
+      - place
+    parameters: []
+  /products/:
+    get:
+      operationId: products_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductSerializers'
+      tags:
+      - products
+    parameters: []
+  /products/cart/:
+    get:
+      operationId: products_cart_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - products
+    parameters: []
+  /products/cart/{product_id}/:
+    delete:
+      operationId: products_cart_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - products
+    parameters:
+    - name: product_id
+      in: path
+      required: true
+      type: string
+  /products/info/{id}/:
+    get:
+      operationId: products_info_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - products
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /products/{id}/:
+    get:
+      operationId: products_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - products
+    put:
+      operationId: products_update
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - products
+    delete:
+      operationId: products_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - products
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+definitions:
+  CustomTokenObtainPair:
+    required:
+    - email
+    - password
+    type: object
+    properties:
+      email:
+        title: Email
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+  TokenObtainPair:
+    required:
+    - email
+    - password
+    type: object
+    properties:
+      email:
+        title: Email
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+  TokenRefresh:
+    required:
+    - refresh
+    type: object
+    properties:
+      refresh:
+        title: Refresh
+        type: string
+        minLength: 1
+      access:
+        title: Access
+        type: string
+        readOnly: true
+        minLength: 1
+  ProductSerializers:
+    required:
+    - name
+    - price
+    - category
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 255
+        minLength: 1
+      price:
+        title: Price
+        type: string
+        format: decimal
+      photo:
+        title: Photo
+        type: string
+        readOnly: true
+        format: uri
+      creator_id:
+        title: Creator id
+        type: integer
+        readOnly: true
+      description:
+        title: Description
+        type: string
+        x-nullable: true
+      category:
+        title: Category
+        type: string
+        enum:
+        - shoes
+        - Clothing
+        - Electronics
+        - Others

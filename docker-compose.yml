@@ -1,22 +1,20 @@
+version: "3.8"
+
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
   backend:
     build:
-      context: ./backend  # Build from backend dir
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app   # Sync local backend with container
-    # Optional: Add environment variables
-    environment:
-      - PYTHONUNBUFFERED=1
-
-  frontend:
-    build:
-      context: ./frontend  # Build from frontend dir
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app    # Sync local frontend with container
-    # Hot-reload for development
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      - ./backend:/app

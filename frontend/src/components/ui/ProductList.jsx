@@ -4,16 +4,15 @@ import fetchWithAuth from '../utils/fetch';
 import { jwtDecode } from 'jwt-decode';
 import '../static/ProductList.css';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-const BASE_URL = "http://localhost:8000"
+
 const ProductList = ({ showOnlyMine = false }) => {
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [hasOwnProducts, setHasOwnProducts] = useState(false);
-  const [quantities, setQuantities] = useState({}); 
-  const [searchTerm, setSearchTerm] = useState(''); 
+  const [quantities, setQuantities] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -32,7 +31,6 @@ const ProductList = ({ showOnlyMine = false }) => {
       try {
         const allRes = await fetchWithAuth('http://localhost:8000/products/');
         const allData = await allRes.json();
-
         setAllProducts(allData);
 
         const token = localStorage.getItem('access_token');
@@ -49,7 +47,6 @@ const ProductList = ({ showOnlyMine = false }) => {
 
         setProducts(dataToSet);
 
-        // Initialize quantity for each product
         const initialQuantities = {};
         dataToSet.forEach(product => {
           initialQuantities[product.id] = 1;
@@ -62,6 +59,21 @@ const ProductList = ({ showOnlyMine = false }) => {
 
     fetchProducts();
   }, [showOnlyMine]);
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setProducts(allProducts);
+      return;
+    }
+
+    fetchWithAuth(`http://localhost:8000/products/?search=${searchTerm}`)
+      .then(res => res.json())
+      .then(data => {
+        const results = Array.isArray(data) ? data : data.results || [];
+        setProducts(results);
+      })
+      .catch(err => console.error(err));
+  }, [searchTerm]);
 
   const handleDelete = (id) => {
     fetchWithAuth(`http://localhost:8000/products/${id}/`, {
@@ -80,13 +92,21 @@ const ProductList = ({ showOnlyMine = false }) => {
 
   const handleFormSuccess = () => {
     setEditingProduct(null);
-    fetchWithAuth('http://localhost:8000/products/')
-      .then(res => res?.json())
+    const fetchUrl = showOnlyMine
+      ? 'http://localhost:8000/my_products/'
+      : 'http://localhost:8000/products/';
+
+    fetchWithAuth(fetchUrl)
+      .then(res => res.json())
       .then(data => {
-        if (data) {
-          setProducts(showOnlyMine ? data.filter(p => p.creator_id === currentUser) : data);
-          setAllProducts(data);
-        }
+        setProducts(data);
+        setAllProducts(data);
+
+        const updatedQuantities = {};
+        data.forEach(product => {
+          updatedQuantities[product.id] = 1;
+        });
+        setQuantities(updatedQuantities);
       });
   };
 
@@ -116,44 +136,27 @@ const ProductList = ({ showOnlyMine = false }) => {
       .then(data => {
         console.log('Cart updated:', data);
         alert('Item added to cart!');
-        setQuantities(prev => ({ ...prev, [productId]: 1 })); // Reset to 1
+        setQuantities(prev => ({ ...prev, [productId]: 1 }));
       })
       .catch(error => console.error('Error:', error));
   };
-  useEffect(() => {
-  if (searchTerm.trim() === "") {
-    setProducts(allProducts);
-    return;
-  }
 
-  fetchWithAuth(`http://localhost:8000/products/?search=${searchTerm}`)
-    .then(res => res.json())
-    .then(data => {
-      const results = Array.isArray(data) ? data : data.results || [];
-      setProducts(results);
-    })
-    .catch(err => console.error(err));
-}, [searchTerm]);
   return (
     <div className="product-list-container">
       <div className="product-header">
-        <h1>Product List</h1>
+        <h1>{showOnlyMine ? 'My Products' : 'Product List'}</h1>
       </div>
-      <div>
-  <input
-    type="text"
-    placeholder="Search products..."
-    onChange={(e) => setSearchTerm(e.target.value)}
-    value={searchTerm}
-  />
-  {searchTerm && (
-    <ul>
-      {products.map(product => (
-        <li key={product.id}>{product.name}</li>
-      ))}
-    </ul>
-  )}
-</div>
+
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search products..."
+          onChange={(e) => setSearchTerm(e.target.value)}
+          value={searchTerm}
+        />
+      </div>
+
+      
 
       {editingProduct && (
         <div className="edit-form">
@@ -164,6 +167,12 @@ const ProductList = ({ showOnlyMine = false }) => {
           </button>
         </div>
       )}
+      {showOnlyMine && !editingProduct && (
+        <div className="create-form">
+          <h2>Create New Product</h2>
+          <ProductForm onSuccess={handleFormSuccess} />
+        </div>
+      )}  
 
       <div className="product-grid">
         {products.length > 0 ? (
@@ -192,17 +201,19 @@ const ProductList = ({ showOnlyMine = false }) => {
                 )}
                 <button className="cart-btn" onClick={() => addToCart(product.id)}>Add to Cart</button>
               </div>
-              
             </div>
           ))
         ) : (
-          <div className="no-products-msg">No products found.
-          <p>Create Your Product</p>
-          <ProductForm productToEdit={editingProduct} onSuccess={handleFormSuccess} />          
+          <div className="no-products-msg">
+            No products found.
+            {showOnlyMine && (
+              <>
+                <p>Create your first product below.</p>
+                <ProductForm onSuccess={handleFormSuccess} />
+              </>
+            )}
           </div>
         )}
-       
-
       </div>
     </div>
   );
