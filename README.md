@@ -34,7 +34,7 @@ docker-compose up --build
 Frontend: http://localhost:3000
 Backend API: http://localhost:8000
 DEBUG=True
-SECRET_KEY=your-secret-key
+SECRET_KEY='django-insecure--1xpondxlhs0r*+g2ne$j9g^n&t0(o5%0*$!wf@+7v^@4e%y#a'
 ALLOWED_HOSTS=localhost,127.0.0.1
 3 . Running Tests
 To run backend (Django) tests:
